@@ -37,6 +37,6 @@ export default async function MeetingPage({
 
   const meeting: SacramentMeeting =
     (await response.json()) as SacramentMeeting;
-
+    console.log("MEETING:", meeting);
   return <MeetingDetail meeting={meeting} />;
 }

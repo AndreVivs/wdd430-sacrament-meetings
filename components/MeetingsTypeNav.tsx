@@ -30,7 +30,7 @@ const meetingTypes: MeetingTypeLink[] = [
 
 export default function MeetingsTypeNav() {
   const searchParams = useSearchParams();
-  const activeType = searchParams.get("type");
+  const activeQuery = searchParams.get("query");
 
   return (
     <nav
@@ -39,12 +39,13 @@ export default function MeetingsTypeNav() {
     >
       <ul className="flex flex-wrap gap-3">
         {meetingTypes.map((meetingType) => {
-          const isActive = activeType === meetingType.type;
+          const isActive =
+            activeQuery?.toLowerCase() === meetingType.type;
 
           return (
             <li key={meetingType.type}>
               <Link
-                href={`/meetings?type=${meetingType.type}`}
+                href={`/meetings?query=${meetingType.type}&page=1`}
                 className={`inline-block rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
                   isActive
                     ? "border-primary bg-primary text-white"

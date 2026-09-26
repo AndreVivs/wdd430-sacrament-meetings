@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { getMeetings } from "@/lib/meetings-db";
-import type { SacramentMeeting } from "@/lib/types";
 import { redirect } from "next/navigation";
+import { getMeetingByDate } from "@/lib/meetings-db";
+import type { SacramentMeeting } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
-export default function CurrentMeetingPage() {
+export default async function CurrentMeetingPage() {
   const today = new Date();
 
   const dayOfWeek: number = today.getDay();
@@ -19,11 +19,8 @@ export default function CurrentMeetingPage() {
     String(sunday.getDate()).padStart(2, "0"),
   ].join("-");
 
-  const meetings: SacramentMeeting[] =
-    getMeetings(sundayDate);
-
-  const currentMeeting: SacramentMeeting | undefined =
-    meetings[0];
+  const currentMeeting: SacramentMeeting | null =
+    await getMeetingByDate(sundayDate);
 
   if (currentMeeting) {
     redirect(`/meetings/${currentMeeting.id}`);
