@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import MeetingForm from "@/components/MeetingForm";
 
 import {
@@ -25,11 +26,7 @@ export default async function EditMeetingPage({
     await getMeetingById(meetingId);
 
   if (!meeting) {
-    return (
-      <p className="text-muted">
-        Meeting not found.
-      </p>
-    );
+    notFound();
   }
 
   const updateMeetingWithId =

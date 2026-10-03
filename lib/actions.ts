@@ -166,15 +166,17 @@ export async function createMeeting(
 
   try {
     await addMeeting(meeting);
-  } catch {
-    return {
-      message:
-        "Database error: failed to create meeting.",
-    };
+  } catch (error) {
+    console.error("Failed to create meeting:", error);
+
+    throw new Error(
+      "Unable to create the meeting. Please try again."
+    );
   }
 
   revalidatePath("/meetings");
   redirect("/meetings");
+
 }
 
 export async function updateMeeting(
@@ -243,22 +245,32 @@ export async function updateMeeting(
   };
 
   try {
-    await updateMeetingInDb(id, updates);
-  } catch {
-    return {
-      message:
-        "Database error: failed to update meeting.",
-    };
-  }
+  await updateMeetingInDb(id, updates);
+} catch (error) {
+  console.error("Failed to update meeting:", error);
 
-  revalidatePath("/meetings");
-  redirect("/meetings");
+  throw new Error(
+    "Unable to update the meeting. Please try again."
+  );
+}
+
+revalidatePath("/meetings");
+redirect("/meetings");
+
 }
 
 export async function deleteMeeting(
   id: number
 ): Promise<void> {
-  await deleteMeetingFromDb(id);
+  try {
+    await deleteMeetingFromDb(id);
+  } catch (error) {
+    console.error("Failed to delete meeting:", error);
+
+    throw new Error(
+      "Unable to delete the meeting. Please try again."
+    );
+  }
 
   revalidatePath("/meetings");
   redirect("/meetings");
