@@ -3,7 +3,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { getMeetings } from "@/lib/meetings-db";
+import { getMeetingByDate } from "@/lib/meetings-db";
 import type { SacramentMeeting } from "@/lib/types";
 
 import { Inter, Playfair_Display } from "next/font/google";
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -50,11 +50,11 @@ export default function RootLayout({
     String(sunday.getDate()).padStart(2, "0"),
   ].join("-");
 
-  const currentMeetings: SacramentMeeting[] =
-    getMeetings(sundayDate);
+  const currentMeeting: SacramentMeeting | null =
+    await getMeetingByDate(sundayDate);
 
   const currentMeetingId: number | undefined =
-    currentMeetings[0]?.id;
+    currentMeeting?.id;
 
   return (
     <html lang="en">

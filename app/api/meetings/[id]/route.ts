@@ -1,4 +1,5 @@
 // GET /api/meetings/[id]
+
 import { getMeetingById } from "@/lib/meetings-db";
 import type { SacramentMeeting } from "@/lib/types";
 
@@ -24,7 +25,7 @@ export async function GET(
   }
 
   const meeting: SacramentMeeting | null =
-    getMeetingById(meetingId);
+    await getMeetingById(meetingId);
 
   if (!meeting) {
     return Response.json(
