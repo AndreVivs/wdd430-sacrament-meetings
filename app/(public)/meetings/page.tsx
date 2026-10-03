@@ -6,6 +6,7 @@ import {
   getMeetingsTotalPages,
 } from "@/lib/meetings-db";
 import type { SacramentMeeting } from "@/lib/types";
+import Link from "next/link";
 
 interface MeetingsPageProps {
   searchParams?: Promise<{
@@ -33,14 +34,23 @@ export default async function MeetingsPage({
 
   return (
     <section>
-      <div className="mb-6">
-        <h1 className="font-display text-3xl font-bold text-foreground">
-          Meetings
-        </h1>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-bold text-foreground">
+            Meetings
+          </h1>
 
-        <p className="mt-2 text-muted">
-          View current and past meeting programs.
-        </p>
+          <p className="mt-2 text-muted">
+            View current and past meeting programs.
+          </p>
+        </div>
+
+        <Link
+          href="/meetings/new"
+          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+        >
+          Create Meeting
+        </Link>
       </div>
 
       <div className="mb-6">
