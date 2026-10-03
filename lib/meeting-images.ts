@@ -5,4 +5,5 @@ export const meetingImages: Record<MeetingType, string> = {
   regular: "/images/regular.jpg",
   stake: "/images/stake.jpg",
   general: "/images/general.jpg",
+  special: "/images/regular.jpg",
 };

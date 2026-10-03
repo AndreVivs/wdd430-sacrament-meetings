@@ -26,6 +26,10 @@ const meetingTypes: MeetingTypeLink[] = [
     label: "General",
     type: "general",
   },
+  {
+    label: "Special",
+    type: "special",
+  },
 ];
 
 export default function MeetingsTypeNav() {
