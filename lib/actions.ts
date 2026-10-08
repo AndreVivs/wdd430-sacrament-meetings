@@ -12,6 +12,9 @@ import {
 
 import type { SacramentMeeting } from "@/lib/types";
 
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
+
 const MeetingFormSchema = z.object({
   date: z
     .string()
@@ -388,4 +391,25 @@ export async function deleteMeeting(
 
   revalidatePath("/meetings");
   redirect("/meetings");
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData
+) {
+  try {
+    await signIn("credentials", formData);
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return "Invalid email or password.";
+
+        default:
+          return "Something went wrong.";
+      }
+    }
+
+    throw error;
+  }
 }
