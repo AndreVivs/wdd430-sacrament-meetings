@@ -144,6 +144,159 @@ export default function MeetingForm({
         </div>
       </div>
 
+      <div>
+        <label
+          htmlFor="announcements"
+          className="mb-2 block font-medium text-foreground"
+        >
+          Announcements
+        </label>
+
+        <textarea
+          id="announcements"
+          name="announcements"
+          rows={4}
+          defaultValue={
+            meeting?.announcements?.join("\n") ?? ""
+          }
+          aria-describedby="announcements-error"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground"
+          placeholder="One announcement per line"
+        />
+
+        <div
+          id="announcements-error"
+          aria-live="polite"
+        >
+          {state.errors?.announcements?.map((error) => (
+            <p
+              key={error}
+              className="mt-1 text-sm text-red-600"
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="wardBusiness"
+          className="mb-2 block font-medium text-foreground"
+        >
+          Ward Business
+        </label>
+
+        <textarea
+          id="wardBusiness"
+          name="wardBusiness"
+          rows={4}
+          defaultValue={
+            meeting?.wardBusiness
+              .map((item) => item.description)
+              .join("\n") ?? ""
+          }
+          aria-describedby="wardBusiness-error"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground"
+          placeholder="One item per line"
+        />
+
+        <div
+          id="wardBusiness-error"
+          aria-live="polite"
+        >
+          {state.errors?.wardBusiness?.map((error) => (
+            <p
+              key={error}
+              className="mt-1 text-sm text-red-600"
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <div className="flex items-center gap-3">
+          <input
+            id="stakeBusiness"
+            name="stakeBusiness"
+            type="checkbox"
+            defaultChecked={meeting?.stakeBusiness ?? false}
+            aria-describedby="stakeBusiness-error"
+            className="h-4 w-4"
+          />
+
+          <label
+            htmlFor="stakeBusiness"
+            className="font-medium text-foreground"
+          >
+            Includes Stake Business
+          </label>
+        </div>
+
+        <div
+          id="stakeBusiness-error"
+          aria-live="polite"
+        >
+          {state.errors?.stakeBusiness?.map((error) => (
+            <p
+              key={error}
+              className="mt-1 text-sm text-red-600"
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <label
+          htmlFor="speakers"
+          className="mb-2 block font-medium text-foreground"
+        >
+          Speakers / Musical Numbers
+        </label>
+
+        <textarea
+          id="speakers"
+          name="speakers"
+          rows={5}
+          defaultValue={
+            meeting?.speakers
+              .map(
+                (speaker) =>
+                  `${speaker.name} | ${speaker.topic} | ${speaker.type}`
+              )
+              .join("\n") ?? ""
+          }
+          aria-describedby="speakers-error speakers-help"
+          className="w-full rounded-lg border border-border bg-background px-4 py-2 text-foreground"
+          placeholder="Sister Brown | Faith in Christ | speaker"
+        />
+
+        <p
+          id="speakers-help"
+          className="mt-1 text-sm text-muted"
+        >
+          One entry per line: Name | Topic | speaker or musical-number
+        </p>
+
+        <div
+          id="speakers-error"
+          aria-live="polite"
+        >
+          {state.errors?.speakers?.map((error) => (
+            <p
+              key={error}
+              className="mt-1 text-sm text-red-600"
+            >
+              {error}
+            </p>
+          ))}
+        </div>
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
         <div>
           <label
