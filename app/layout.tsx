@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getMeetingByDate } from "@/lib/meetings-db";
-import type { SacramentMeeting } from "@/lib/types";
 
 import { Inter, Playfair_Display } from "next/font/google";
 
@@ -50,11 +49,21 @@ export default async function RootLayout({
     String(sunday.getDate()).padStart(2, "0"),
   ].join("-");
 
-  const currentMeeting: SacramentMeeting | null =
-    await getMeetingByDate(sundayDate);
+  let currentMeetingId: number | undefined;
 
-  const currentMeetingId: number | undefined =
-    currentMeeting?.id;
+  try {
+    const currentMeeting =
+      await getMeetingByDate(sundayDate);
+
+    currentMeetingId = currentMeeting?.id;
+  } catch (error) {
+    console.error(
+      "Failed to load current meeting for header:",
+      error
+    );
+
+    currentMeetingId = undefined;
+  }
 
   return (
     <html lang="en">
