@@ -4,7 +4,6 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { getMeetingByDate } from "@/lib/meetings-db";
-import type { SacramentMeeting } from "@/lib/types";
 
 import { Inter, Playfair_Display } from "next/font/google";
 
@@ -19,9 +18,25 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Sacrament Meeting Manager",
+  metadataBase: new URL(
+    "https://wdd430-sacrament-meetings-ten.vercel.app"
+  ),
+
+  title: {
+    default: "Sacrament Meeting Manager",
+    template: "%s | Sacrament Meeting Manager",
+  },
+
   description:
     "Manage, view, and print sacrament meeting programs for current and past Sundays.",
+
+  openGraph: {
+    title: "Sacrament Meeting Manager",
+    description:
+      "Manage, view, and print sacrament meeting programs for current and past Sundays.",
+    type: "website",
+    images: ["/opengraph-image.png"],
+  },
 };
 
 export const dynamic = "force-dynamic";
@@ -50,11 +65,21 @@ export default async function RootLayout({
     String(sunday.getDate()).padStart(2, "0"),
   ].join("-");
 
-  const currentMeeting: SacramentMeeting | null =
-    await getMeetingByDate(sundayDate);
+  let currentMeetingId: number | undefined;
 
-  const currentMeetingId: number | undefined =
-    currentMeeting?.id;
+  try {
+    const currentMeeting =
+      await getMeetingByDate(sundayDate);
+
+    currentMeetingId = currentMeeting?.id;
+  } catch (error) {
+    console.error(
+      "Failed to load current meeting for header:",
+      error
+    );
+
+    currentMeetingId = undefined;
+  }
 
   return (
     <html lang="en">

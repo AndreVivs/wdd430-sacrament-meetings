@@ -8,9 +8,15 @@ import {
   addMeeting,
   updateMeeting as updateMeetingInDb,
   deleteMeeting as deleteMeetingFromDb,
+  getMeetingByDate,
 } from "@/lib/meetings-db";
 
 import type { SacramentMeeting } from "@/lib/types";
+
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
+
+import { auth } from "@/auth";
 
 const MeetingFormSchema = z.object({
   date: z
@@ -74,6 +80,21 @@ const MeetingFormSchema = z.object({
     .string()
     .trim()
     .min(1, "Closing prayer is required."),
+
+  announcements: z
+    .string()
+    .optional(),
+
+  wardBusiness: z
+    .string()
+    .optional(),
+
+  stakeBusiness: z
+    .boolean(),
+
+  speakers: z
+    .string()
+    .optional(),
 });
 
 export interface MeetingActionState {
@@ -90,6 +111,10 @@ export interface MeetingActionState {
     closingHymnNumber?: string[];
     closingHymnTitle?: string[];
     closingPrayer?: string[];
+    announcements?: string[];
+    wardBusiness?: string[];
+    stakeBusiness?: string[];
+    speakers?: string[];
   };
 
   message?: string;
@@ -99,6 +124,8 @@ export async function createMeeting(
   _previousState: MeetingActionState,
   formData: FormData
 ): Promise<MeetingActionState> {
+  await requireAuthenticatedUser();
+
   const validatedFields = MeetingFormSchema.safeParse({
     date: formData.get("date"),
     meetingType: formData.get("meetingType"),
@@ -120,6 +147,14 @@ export async function createMeeting(
       formData.get("closingHymnTitle"),
     closingPrayer:
       formData.get("closingPrayer"),
+    announcements:
+      formData.get("announcements"),
+    wardBusiness:
+      formData.get("wardBusiness"),
+    stakeBusiness:
+      formData.get("stakeBusiness") === "on",
+    speakers:
+      formData.get("speakers"),
   });
 
   if (!validatedFields.success) {
@@ -133,12 +168,63 @@ export async function createMeeting(
 
   const data = validatedFields.data;
 
+  const existingMeeting = await getMeetingByDate(data.date);
+
+  if (existingMeeting) {
+    return {
+      errors: {
+        date: [
+          "A meeting already exists for this date.",
+        ],
+      },
+      message:
+        "Please choose a different date.",
+    };
+  }
+
+  const announcements = data.announcements
+  ? data.announcements
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean)
+  : [];
+
+const wardBusiness = data.wardBusiness
+  ? data.wardBusiness
+      .split("\n")
+      .map((description) => description.trim())
+      .filter(Boolean)
+      .map((description) => ({
+        description,
+      }))
+  : [];
+
+const speakers = data.speakers
+  ? data.speakers
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [name, topic = "", type = "speaker"] =
+          line.split("|").map((item) => item.trim());
+
+        return {
+          name,
+          topic,
+          type:
+            type === "musical-number"
+              ? ("musical-number" as const)
+              : ("speaker" as const),
+        };
+      })
+  : [];
+
   const meeting: Omit<SacramentMeeting, "id"> = {
     date: data.date,
     meetingType: data.meetingType,
     presiding: data.presiding,
     conducting: data.conducting,
-    announcements: [],
+    announcements,
 
     openingHymn: {
       number: data.openingHymnNumber,
@@ -146,15 +232,15 @@ export async function createMeeting(
     },
 
     openingPrayer: data.openingPrayer,
-    wardBusiness: [],
-    stakeBusiness: false,
+    wardBusiness,
+    stakeBusiness: data.stakeBusiness,
 
     sacramentHymn: {
       number: data.sacramentHymnNumber,
       title: data.sacramentHymnTitle,
     },
 
-    speakers: [],
+    speakers,
 
     closingHymn: {
       number: data.closingHymnNumber,
@@ -184,6 +270,8 @@ export async function updateMeeting(
   _previousState: MeetingActionState,
   formData: FormData
 ): Promise<MeetingActionState> {
+  await requireAuthenticatedUser();
+
   const validatedFields = MeetingFormSchema.safeParse({
     date: formData.get("date"),
     meetingType: formData.get("meetingType"),
@@ -205,6 +293,14 @@ export async function updateMeeting(
       formData.get("closingHymnTitle"),
     closingPrayer:
       formData.get("closingPrayer"),
+        announcements:
+      formData.get("announcements"),
+    wardBusiness:
+      formData.get("wardBusiness"),
+    stakeBusiness:
+      formData.get("stakeBusiness") === "on",
+    speakers:
+      formData.get("speakers"),
   });
 
   if (!validatedFields.success) {
@@ -217,6 +313,43 @@ export async function updateMeeting(
   }
 
   const data = validatedFields.data;
+
+  const announcements = data.announcements
+  ? data.announcements
+      .split("\n")
+      .map((item) => item.trim())
+      .filter(Boolean)
+  : [];
+
+const wardBusiness = data.wardBusiness
+  ? data.wardBusiness
+      .split("\n")
+      .map((description) => description.trim())
+      .filter(Boolean)
+      .map((description) => ({
+        description,
+      }))
+  : [];
+
+const speakers = data.speakers
+  ? data.speakers
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [name, topic = "", type = "speaker"] =
+          line.split("|").map((item) => item.trim());
+
+        return {
+          name,
+          topic,
+          type:
+            type === "musical-number"
+              ? ("musical-number" as const)
+              : ("speaker" as const),
+        };
+      })
+  : [];
 
   const updates: Partial<SacramentMeeting> = {
     date: data.date,
@@ -242,6 +375,11 @@ export async function updateMeeting(
     },
 
     closingPrayer: data.closingPrayer,
+
+    announcements,
+    wardBusiness,
+    stakeBusiness: data.stakeBusiness,
+    speakers,
   };
 
   try {
@@ -262,6 +400,8 @@ redirect("/meetings");
 export async function deleteMeeting(
   id: number
 ): Promise<void> {
+  await requireAuthenticatedUser();
+
   try {
     await deleteMeetingFromDb(id);
   } catch (error) {
@@ -274,4 +414,39 @@ export async function deleteMeeting(
 
   revalidatePath("/meetings");
   redirect("/meetings");
+}
+
+export async function authenticate(
+  prevState: string | undefined,
+  formData: FormData
+) {
+  try {
+    await signIn("credentials", {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      redirectTo: "/meetings",
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case "CredentialsSignin":
+          return "Invalid email or password.";
+
+        default:
+          return "Something went wrong.";
+      }
+    }
+
+    throw error;
+  }
+}
+
+async function requireAuthenticatedUser() {
+  const session = await auth();
+
+  if (!session?.user) {
+    throw new Error("Not authenticated.");
+  }
+
+  return session;
 }
