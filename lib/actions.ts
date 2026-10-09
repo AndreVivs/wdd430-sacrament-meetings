@@ -8,6 +8,7 @@ import {
   addMeeting,
   updateMeeting as updateMeetingInDb,
   deleteMeeting as deleteMeetingFromDb,
+  getMeetingByDate,
 } from "@/lib/meetings-db";
 
 import type { SacramentMeeting } from "@/lib/types";
@@ -166,6 +167,20 @@ export async function createMeeting(
   }
 
   const data = validatedFields.data;
+
+  const existingMeeting = await getMeetingByDate(data.date);
+
+  if (existingMeeting) {
+    return {
+      errors: {
+        date: [
+          "A meeting already exists for this date.",
+        ],
+      },
+      message:
+        "Please choose a different date.",
+    };
+  }
 
   const announcements = data.announcements
   ? data.announcements
