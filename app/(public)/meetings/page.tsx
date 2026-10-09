@@ -9,6 +9,14 @@ import type { SacramentMeeting } from "@/lib/types";
 import Link from "next/link";
 import { auth } from "@/auth";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Meetings",
+  description:
+    "Browse current and past sacrament meeting programs for Lehi 3rd Ward.",
+};
+
 interface MeetingsPageProps {
   searchParams?: Promise<{
     query?: string;

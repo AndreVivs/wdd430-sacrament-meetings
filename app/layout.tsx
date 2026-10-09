@@ -18,9 +18,25 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Sacrament Meeting Manager",
+  metadataBase: new URL(
+    "https://wdd430-sacrament-meetings-ten.vercel.app"
+  ),
+
+  title: {
+    default: "Sacrament Meeting Manager",
+    template: "%s | Sacrament Meeting Manager",
+  },
+
   description:
     "Manage, view, and print sacrament meeting programs for current and past Sundays.",
+
+  openGraph: {
+    title: "Sacrament Meeting Manager",
+    description:
+      "Manage, view, and print sacrament meeting programs for current and past Sundays.",
+    type: "website",
+    images: ["/opengraph-image.png"],
+  },
 };
 
 export const dynamic = "force-dynamic";
