@@ -15,6 +15,8 @@ import type { SacramentMeeting } from "@/lib/types";
 import { signIn } from "@/auth";
 import { AuthError } from "next-auth";
 
+import { auth } from "@/auth";
+
 const MeetingFormSchema = z.object({
   date: z
     .string()
@@ -121,6 +123,8 @@ export async function createMeeting(
   _previousState: MeetingActionState,
   formData: FormData
 ): Promise<MeetingActionState> {
+  await requireAuthenticatedUser();
+
   const validatedFields = MeetingFormSchema.safeParse({
     date: formData.get("date"),
     meetingType: formData.get("meetingType"),
@@ -251,6 +255,8 @@ export async function updateMeeting(
   _previousState: MeetingActionState,
   formData: FormData
 ): Promise<MeetingActionState> {
+  await requireAuthenticatedUser();
+
   const validatedFields = MeetingFormSchema.safeParse({
     date: formData.get("date"),
     meetingType: formData.get("meetingType"),
@@ -379,6 +385,8 @@ redirect("/meetings");
 export async function deleteMeeting(
   id: number
 ): Promise<void> {
+  await requireAuthenticatedUser();
+
   try {
     await deleteMeetingFromDb(id);
   } catch (error) {
@@ -398,7 +406,11 @@ export async function authenticate(
   formData: FormData
 ) {
   try {
-    await signIn("credentials", formData);
+    await signIn("credentials", {
+      email: formData.get("email"),
+      password: formData.get("password"),
+      redirectTo: "/meetings",
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -412,4 +424,14 @@ export async function authenticate(
 
     throw error;
   }
+}
+
+async function requireAuthenticatedUser() {
+  const session = await auth();
+
+  if (!session?.user) {
+    throw new Error("Not authenticated.");
+  }
+
+  return session;
 }

@@ -4,10 +4,12 @@ import type { SacramentMeeting } from "@/lib/types";
 
 interface MeetingCardProps {
   meeting: SacramentMeeting;
+  canManage: boolean;
 }
 
 export default function MeetingCard({
   meeting,
+  canManage,
 }: MeetingCardProps) {
   const deleteMeetingWithId =
     deleteMeeting.bind(null, meeting.id);
@@ -50,21 +52,25 @@ export default function MeetingCard({
           View details
         </Link>
 
-        <Link
-          href={`/meetings/${meeting.id}/edit`}
-          className="inline-block rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
-        >
-          Edit
-        </Link>
+        {canManage && (
+          <>
+            <Link
+              href={`/meetings/${meeting.id}/edit`}
+              className="inline-block rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary hover:text-primary"
+            >
+              Edit
+            </Link>
 
-        <form action={deleteMeetingWithId}>
-          <button
-            type="submit"
-            className="rounded-lg border border-red-500 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
-          >
-            Delete
-          </button>
-        </form>
+            <form action={deleteMeetingWithId}>
+              <button
+                type="submit"
+                className="rounded-lg border border-red-500 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
+              >
+                Delete
+              </button>
+            </form>
+          </>
+        )}
       </div>
     </article>
   );

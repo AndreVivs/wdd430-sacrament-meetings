@@ -7,6 +7,7 @@ import {
 } from "@/lib/meetings-db";
 import type { SacramentMeeting } from "@/lib/types";
 import Link from "next/link";
+import { auth } from "@/auth";
 
 interface MeetingsPageProps {
   searchParams?: Promise<{
@@ -18,6 +19,8 @@ interface MeetingsPageProps {
 export default async function MeetingsPage({
   searchParams,
 }: MeetingsPageProps) {
+  const session = await auth();
+  const canManage = !!session?.user;
   const params = await searchParams;
 
   const query: string = params?.query ?? "";
@@ -45,12 +48,14 @@ export default async function MeetingsPage({
           </p>
         </div>
 
-        <Link
-          href="/meetings/new"
-          className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
-        >
-          Create Meeting
-        </Link>
+        {canManage && (
+          <Link
+            href="/meetings/new"
+            className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          >
+            Create Meeting
+          </Link>
+        )}
       </div>
 
       <div className="mb-6">
@@ -64,6 +69,7 @@ export default async function MeetingsPage({
               <MeetingCard
                 key={meeting.id}
                 meeting={meeting}
+                canManage={canManage}
               />
             ))}
           </div>
